@@ -4,7 +4,7 @@ import os, requests
 app = FastAPI(title="ArgosBot")
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
+URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
 @app.post("/webhook/telegram")
 async def telegram_webhook(request: Request):
@@ -20,7 +20,7 @@ async def telegram_webhook(request: Request):
                 "chat_id": chat_id,
                 "text": "¡Hola! Soy ArgosBot. El servidor funciona."
             }
-            requests.post(URL_TELEGRAM, json=payload)
+            requests.post(URL_TELEGRAM, json=payload, timeout=5)
 
     except KeyError:
         pass
