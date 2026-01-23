@@ -1,5 +1,5 @@
-import requests
-import os
+import os, requests
+from requests import RequestException
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -19,7 +19,7 @@ def cmd_status(chat_id, data=None):
             status = "Todo normal. El dispositivo está online."
         else:
             status = f"Respuesta inusual del servidor: {response.status_code}"
-    except (TimeoutError, ConnectionError):
+    except (TimeoutError, ConnectionError, RequestException):
         status = "¡ALERTA! No hay conexión con el objetivo (Posible corte de luz)."
 
     payload = {"chat_id": chat_id, "text": status}
