@@ -1,8 +1,18 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron_watchdog",
+      "schedule": "*/10 * * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/robots.txt",
       "destination": "/robots.txt"
+    },
+    {
+      "source": "/api/cron_watchdog",
+      "destination": "/api/main.py"
     },
     {
       "source": "/(.*)",
