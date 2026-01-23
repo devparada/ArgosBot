@@ -5,11 +5,11 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 TARGET_URL = os.getenv("TARGET_URL")
 
-def cmd_hello(chat_id):
+def cmd_hello(chat_id, data=None):
     payload = {"chat_id": chat_id, "text": "¡Hola! Soy ArgosBot. El servidor funciona."}
     requests.post(URL_TELEGRAM, json=payload, timeout=5)
 
-def cmd_status(chat_id):
+def cmd_status(chat_id, data=None):
     # Aquí es donde verificaremos si hay internet/luz
     try:
         # Hacemos una petición rápida para ver si hay conexión
