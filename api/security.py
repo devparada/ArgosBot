@@ -5,7 +5,6 @@ from fastapi import Request, HTTPException
 SECRET_TOKEN = os.getenv("SECRET_TOKEN")
 AUTHORIZED_USER_ID = os.getenv("MY_USER_ID")
 
-
 def validate_telegram_request(request: Request, data: dict):
     # Validar que la petición viene de Telegram
     x_telegram_token = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
@@ -14,9 +13,14 @@ def validate_telegram_request(request: Request, data: dict):
 
     # Validar que el mensaje es de TU ID de usuario
     message = data.get("message") or data.get("callback_query", {}).get("message")
-    user_id = data.get("message", {}).get("from", {}).get("id") if message else None
+
+    if not message:
+        return True
+
+    # Comprueba que el ID sea el autorizado
+    user_id = message.get("from", {}).get("id")
     if str(user_id) != str(AUTHORIZED_USER_ID):
-        print(f"Intento de acceso no autorizado del ID: {user_id}")
+        print(f"Intento de acceso no autorizado")
         raise HTTPException(status_code=403, detail="Usuario no autorizado")
 
     return True

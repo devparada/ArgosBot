@@ -12,18 +12,6 @@ URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/"
 async def telegram_webhook(request: Request):
     data = await request.json()
 
-    user_id = data.get("message", {}).get("from", {}).get("id")
-    chat_id = data.get("message", {}).get("chat", {}).get("id")
-    texto = data.get("message", {}).get("text", "")
-
-    if texto == "/me":
-        payload = {
-            "chat_id": chat_id,
-            "text": f"Tu ID de Telegram es: {user_id}"
-        }
-        requests.post(URL_TELEGRAM, json=payload, timeout=5)
-        return {"status": "ok"}
-
     validate_telegram_request(request, data)
 
     try:
