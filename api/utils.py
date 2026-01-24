@@ -3,20 +3,15 @@ import os
 import requests
 
 
-def enviar_mensaje_telegram(mensaje: str, chat_id: str = None):
+def enviar_mensaje_telegram(mensaje: str, chat_id):
     """
     Envía un mensaje de texto a tu chat de Telegram.
     """
     token = os.environ.get("TELEGRAM_TOKEN")
-    target_chat = chat_id or os.environ.get("TELEGRAM_CHAT_ID")
-
-    if not token or not target_chat:
-        print("Error: No se han configurado las variables de Telegram")
-        return
-
     url = f"https://api.telegram.org/bot{token}/sendMessage"
+
     payload = {
-        "chat_id": target_chat,
+        "chat_id": chat_id,
         "text": mensaje,
         "parse_mode": "Markdown"
     }

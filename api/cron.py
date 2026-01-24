@@ -39,11 +39,13 @@ def check_power_status():
 
     if nuevo_estado != estado_anterior:
         if nuevo_estado == "offline":
-            enviar_mensaje_telegram("*Apagón*: No se puede contactar con la casa.")
+            texto = "*Apagón*: No se puede contactar con la casa."
         else:
-            enviar_mensaje_telegram("*Luz*: Conexión restablecida.")
+            texto="*Luz*: Conexión restablecida."
 
         redis.set("estado_luz", nuevo_estado)
+        if MY_USER_ID:
+            enviar_mensaje_telegram(texto, MY_USER_ID)
         return {"status": "changed", "new_state": nuevo_estado}
 
     return {"status": "unchanged", "state": nuevo_estado}
