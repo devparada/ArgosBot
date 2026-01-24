@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Request, Header, HTTPException
+
 from api.commands import COMMANDS
 from api.cron import check_power_status
 from api.security import validate_telegram_request
 
 app = FastAPI(title="ArgosBot")
+
 
 @app.post("/webhook/telegram")
 async def telegram_webhook(request: Request):
@@ -22,6 +24,7 @@ async def telegram_webhook(request: Request):
 
     return {"status": "ok"}
 
+
 @app.get("/api/cron_watchdog")
 async def cron_watchdog(x_vercel_cron: str = Header(None)):
     """
@@ -34,6 +37,7 @@ async def cron_watchdog(x_vercel_cron: str = Header(None)):
 
     result = check_power_status()
     return result
+
 
 @app.get("/")
 async def home():

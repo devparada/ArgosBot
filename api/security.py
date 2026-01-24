@@ -1,9 +1,11 @@
 import os
+
 from fastapi import Request, HTTPException
 
 # Cargamos las variables de entorno
 SECRET_TOKEN = os.getenv("SECRET_TOKEN")
 AUTHORIZED_USER_ID = os.getenv("MY_USER_ID")
+
 
 def validate_telegram_request(request: Request, data: dict):
     # Validar que la petición viene de Telegram
