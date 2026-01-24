@@ -7,10 +7,12 @@ from upstash_redis import Redis
 
 from api.utils import enviar_mensaje_telegram
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 # Cargamos variables
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 MY_USER_ID = os.getenv("MY_USER_ID")
-TARGET_URL = os.getenv("TARGET_URL")
+TARGET_URL = os.getenv("TARGET_URL", "").replace("https://", "").replace("http://", "")
 URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
 redis = Redis(
@@ -20,9 +22,11 @@ redis = Redis(
 
 
 def check_power_status():
+    if not TARGET_URL:
+        return {"error": "TARGET_URL no configurada"}
+
     # Intentamos conectar con casa
     try:
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         response = requests.get(f"https://{TARGET_URL}", timeout=10, verify=False)
         esta_online = (response.status_code == 200)
     except (RequestException, Timeout, ConnectionError):
@@ -30,8 +34,8 @@ def check_power_status():
 
     nuevo_estado = "online" if esta_online else "offline"
 
-    # Control de Reincidencia con Upstash
-    estado_anterior = redis.get("estado_luz")
+    res_redis = redis.get("estado_luz")
+    estado_anterior = res_redis if res_redis else "desconocido"
 
     if nuevo_estado != estado_anterior:
         if nuevo_estado == "offline":
