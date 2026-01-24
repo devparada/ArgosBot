@@ -1,15 +1,21 @@
-import os, requests
+import os
+
+import requests
 from requests import RequestException
 
+from api.utils import enviar_mensaje_telegram
+
+TARGET_URL = os.getenv("TARGET_URL")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-TARGET_URL = os.getenv("TARGET_URL")
 
-def cmd_hello(chat_id, data=None):
-    payload = {"chat_id": chat_id, "text": "¡Hola! Soy ArgosBot. El servidor funciona."}
-    requests.post(URL_TELEGRAM, json=payload, timeout=5)
 
-def cmd_status(chat_id, data=None):
+def cmd_hello(chat_id, _data=None):
+    texto = "¡Hola! Soy ArgosBot. El servidor funciona."
+    enviar_mensaje_telegram(texto, chat_id)
+
+
+def cmd_status(chat_id, _data=None):
     # Aquí es donde verificaremos si hay internet/luz
     try:
         # Hacemos una petición rápida para ver si hay conexión
@@ -22,8 +28,8 @@ def cmd_status(chat_id, data=None):
     except (TimeoutError, ConnectionError, RequestException):
         status = "¡ALERTA! No hay conexión con el objetivo (Posible corte de luz)."
 
-    payload = {"chat_id": chat_id, "text": status}
-    requests.post(URL_TELEGRAM, json=payload, timeout=5)
+    enviar_mensaje_telegram(status, chat_id)
+
 
 # Diccionario que mapea el texto del comando a la función
 COMMANDS = {
