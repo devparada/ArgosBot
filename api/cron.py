@@ -1,6 +1,7 @@
 import os
 
 import requests
+import urllib3
 from requests.exceptions import RequestException, Timeout, ConnectionError
 from upstash_redis import Redis
 
@@ -21,6 +22,7 @@ redis = Redis(
 def check_power_status():
     # Intentamos conectar con casa
     try:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         response = requests.get(f"https://{TARGET_URL}", timeout=10, verify=False)
         esta_online = (response.status_code == 200)
     except (RequestException, Timeout, ConnectionError):
