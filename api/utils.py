@@ -1,14 +1,13 @@
-import os
-
 import requests
+
+from api.config import Config
 
 
 def enviar_mensaje_telegram(mensaje: str, chat_id):
     """
     Envía un mensaje de texto a tu chat de Telegram.
     """
-    token = os.environ.get("TELEGRAM_TOKEN")
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    url = f"https://api.telegram.org/bot{Config.TELEGRAM_TOKEN}/sendMessage"
 
     payload = {
         "chat_id": chat_id,

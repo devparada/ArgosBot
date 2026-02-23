@@ -1,13 +1,10 @@
-import os
-
 import requests
 from requests import RequestException
 
+from api.config import Config
 from api.utils import enviar_mensaje_telegram
 
-TARGET_URL = os.getenv("TARGET_URL")
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+URL_TELEGRAM = f"https://api.telegram.org/bot{Config.TELEGRAM_TOKEN}/sendMessage"
 
 
 def cmd_hello(chat_id, _data=None):
@@ -19,7 +16,7 @@ def cmd_status(chat_id, _data=None):
     # Aquí es donde verificaremos si hay internet/luz
     try:
         # Hacemos una petición rápida para ver si hay conexión
-        response = requests.get(f"https://{TARGET_URL}", timeout=2)
+        response = requests.get(f"https://{Config.TARGET_URL}", timeout=2)
 
         if response.status_code == 200:
             status = "Todo normal. El dispositivo está online."

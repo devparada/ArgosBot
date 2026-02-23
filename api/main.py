@@ -17,7 +17,7 @@ async def telegram_webhook(request: Request):
         chat_id = data["message"]["chat"]["id"]
         texto = data["message"]["text"]
 
-        # Buscamos si el comando existe en nuestro cargador
+        # Buscamos si el comando existe en el cargador
         handler = COMMANDS.get(texto)
         if handler:
             handler(chat_id, data)
@@ -33,7 +33,7 @@ async def cron_watchdog(x_vercel_cron: str = Header(None)):
     """
     if x_vercel_cron != "1":
         # Si alguien entra desde el navegador, recibirá un 401
-        raise HTTPException(status_code=401, detail="No autorizado: Solo ejecutable por Vercel Cron")
+        raise HTTPException(status_code=401, detail="No autorizado: Solo ejecutable por un Cron")
 
     result = check_power_status()
     return result

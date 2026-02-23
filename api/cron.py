@@ -1,39 +1,38 @@
-import os
+import asyncio
 
-import requests
-import urllib3
-from requests.exceptions import RequestException, Timeout, ConnectionError
+import httpx
 from upstash_redis import Redis
 
+from api.config import Config
 from api.utils import enviar_mensaje_telegram
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-# Cargamos variables
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-MY_USER_ID = os.getenv("MY_USER_ID")
-TARGET_URL = os.getenv("TARGET_URL", "").replace("https://", "").replace("http://", "")
-URL_TELEGRAM = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-
 redis = Redis(
-    url=os.environ.get("UPSTASH_REDIS_REST_URL"),
-    token=os.environ.get("UPSTASH_REDIS_REST_TOKEN")
+    url=Config.UPSTASH_URL,
+    token=Config.UPSTASH_TOKEN
 )
 
 
-def check_power_status():
-    if not TARGET_URL:
+async def check_power_status():
+    if not Config.TARGET_URL:
         return {"error": "TARGET_URL no configurada"}
 
+    esta_online = False
+
     # Intentamos conectar con casa
-    try:
-        response = requests.get(f"https://{TARGET_URL}", timeout=10, verify=False)
-        esta_online = (response.status_code == 200)
-    except (RequestException, Timeout, ConnectionError):
-        esta_online = False
+    async with httpx.AsyncClient(verify=False) as client:
+        for i in range(3):
+            try:
+                response = await client.get(f"https://{Config.TARGET_URL}", timeout=10)
+                if response.status_code == 200:
+                    esta_online = True
+                    break
+            except (httpx.ConnectError, httpx.TimeoutException, httpx.HTTPError):
+                if i < 2:  # No esperar en el último intento
+                    await asyncio.sleep(2)
 
     nuevo_estado = "online" if esta_online else "offline"
 
+    # Lógica de Redis
     res_redis = redis.get("estado_luz")
     estado_anterior = res_redis if res_redis else "desconocido"
 
@@ -41,11 +40,11 @@ def check_power_status():
         if nuevo_estado == "offline":
             texto = "*Apagón*: No se puede contactar con la casa."
         else:
-            texto="*Luz*: Conexión restablecida."
+            texto = "*Luz*: Conexión restablecida."
 
         redis.set("estado_luz", nuevo_estado)
-        if MY_USER_ID:
-            enviar_mensaje_telegram(texto, MY_USER_ID)
+        if Config.MY_USER_ID:
+            enviar_mensaje_telegram(texto, Config.MY_USER_ID)
         return {"status": "changed", "new_state": nuevo_estado}
 
     return {"status": "unchanged", "state": nuevo_estado}
