@@ -35,7 +35,7 @@ async def cron_watchdog(x_vercel_cron: str = Header(None)):
         # Si alguien entra desde el navegador, recibirá un 401
         raise HTTPException(status_code=401, detail="No autorizado: Solo ejecutable por un Cron")
 
-    result = check_power_status()
+    result = await check_power_status()
     return result
 
 
