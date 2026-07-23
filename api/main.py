@@ -40,7 +40,7 @@ async def cron_watchdog(x_vercel_cron: str = Header(None)):
     return result
 
 
-@app.post("/webhook/ups")
+@app.post("/api/webhook/ups")
 async def recibir_webhook_ups(request: Request, authorization: str = Header(None)):
     data = await request.json()
     return await procesar_cambio_ups(data, authorization)
