@@ -33,7 +33,7 @@ async def check_power_status():
     nuevo_estado = "online" if esta_online else "offline"
 
     # Lógica de Redis
-    res_redis = redis.get("estado_luz")
+    res_redis = redis.get("estado_red")
     estado_anterior = res_redis if res_redis else "desconocido"
 
     if nuevo_estado != estado_anterior:
@@ -42,7 +42,7 @@ async def check_power_status():
         else:
             texto = "*Luz*: Conexión restablecida."
 
-        redis.set("estado_luz", nuevo_estado)
+        redis.set("estado_red", nuevo_estado)
         if Config.MY_USER_ID:
             enviar_mensaje_telegram(texto, Config.MY_USER_ID)
         return {"status": "changed", "new_state": nuevo_estado}

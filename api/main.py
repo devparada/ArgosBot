@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request, Header, HTTPException
 from api.commands import COMMANDS
 from api.cron import check_power_status
 from api.security import validate_telegram_request
+from api.ups_handler import procesar_cambio_ups
 
 app = FastAPI(title="ArgosBot")
 
@@ -37,6 +38,12 @@ async def cron_watchdog(x_vercel_cron: str = Header(None)):
 
     result = await check_power_status()
     return result
+
+
+@app.post("/webhook/ups")
+async def recibir_webhook_ups(request: Request, authorization: str = Header(None)):
+    data = await request.json()
+    return await procesar_cambio_ups(data, authorization)
 
 
 @app.get("/")
