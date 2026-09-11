@@ -1,49 +1,12 @@
-from fastapi import FastAPI, Request, Header, HTTPException
+from fastapi import FastAPI
 
-from api.commands import COMMANDS
-from api.cron import check_power_status
-from api.security import validate_telegram_request
-from api.ups_handler import procesar_cambio_ups
+from api.routers import cron, telegram, ups
 
 app = FastAPI(title="ArgosBot")
 
-
-@app.post("/webhook/telegram")
-async def telegram_webhook(request: Request):
-    data = await request.json()
-
-    validate_telegram_request(request, data)
-
-    if "message" in data:
-        chat_id = data["message"]["chat"]["id"]
-        texto = data["message"]["text"]
-
-        # Buscamos si el comando existe en el cargador
-        handler = COMMANDS.get(texto)
-        if handler:
-            handler(chat_id, data)
-
-    return {"status": "ok"}
-
-
-@app.get("/api/cron_watchdog")
-async def cron_watchdog(x_vercel_cron: str = Header(None)):
-    """
-    Solo permite la ejecución si el header X-Vercel-Cron está presente.
-    Vercel lo envía automáticamente en las tareas programadas.
-    """
-    if x_vercel_cron != "1":
-        # Si alguien entra desde el navegador, recibirá un 401
-        raise HTTPException(status_code=401, detail="No autorizado: Solo ejecutable por un Cron")
-
-    result = await check_power_status()
-    return result
-
-
-@app.post("/api/webhook/ups")
-async def recibir_webhook_ups(request: Request, authorization: str = Header(None)):
-    data = await request.json()
-    return await procesar_cambio_ups(data, authorization)
+app.include_router(telegram.router)
+app.include_router(cron.router)
+app.include_router(ups.router)
 
 
 @app.get("/")
