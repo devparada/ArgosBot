@@ -1,6 +1,6 @@
 import requests
 
-from api.config import Config
+from api.config.config import Config
 
 
 def enviar_mensaje_telegram(mensaje: str, chat_id):

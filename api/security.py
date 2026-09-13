@@ -1,6 +1,6 @@
 from fastapi import Request, HTTPException
 
-from api.config import Config
+from api.config.config import Config
 
 
 def validate_telegram_request(request: Request, data: dict):
