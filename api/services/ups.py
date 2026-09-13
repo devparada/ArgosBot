@@ -3,8 +3,8 @@ import time
 
 from fastapi import HTTPException
 
-from api.config import Config
-from api.services.redis import redis
+from api.config.config import Config
+from api.config.redis import redis
 from api.utils import enviar_mensaje_telegram
 
 logger = logging.getLogger(__name__)
