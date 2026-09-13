@@ -2,12 +2,10 @@ import time
 
 import requests
 from requests import RequestException
-from upstash_redis import Redis
 
 from api.config import Config
+from api.services.redis import redis
 from api.utils import enviar_mensaje_telegram
-
-r = Redis(url=Config.UPSTASH_URL, token=Config.UPSTASH_TOKEN)
 
 
 def cmd_status(chat_id, _data=None):
@@ -19,8 +17,8 @@ def cmd_status(chat_id, _data=None):
         conexion_activa = False
 
     # Estado del SAI desde Redis
-    estado_ups = r.get("estado_ups") or "online"
-    start_time_str = r.get("tiempo_caido")
+    estado_ups = redis.get("estado_ups") or "online"
+    start_time_str = redis.get("tiempo_caido")
 
     if conexion_activa and estado_ups == "online":
         texto = "✅ El sistema está operativo, con red y sin incidencias."

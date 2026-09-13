@@ -1,15 +1,9 @@
 import asyncio
-
 import httpx
-from upstash_redis import Redis
 
 from api.config import Config
+from api.services.redis import redis
 from api.utils import enviar_mensaje_telegram
-
-redis = Redis(
-    url=Config.UPSTASH_URL,
-    token=Config.UPSTASH_TOKEN
-)
 
 
 async def check_power_status():

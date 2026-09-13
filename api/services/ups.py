@@ -2,17 +2,12 @@ import logging
 import time
 
 from fastapi import HTTPException
-from upstash_redis.asyncio import Redis
 
 from api.config import Config
+from api.services.redis import redis
 from api.utils import enviar_mensaje_telegram
 
 logger = logging.getLogger(__name__)
-
-r = Redis(
-    url=Config.UPSTASH_URL,
-    token=Config.UPSTASH_TOKEN
-)
 
 
 async def procesar_cambio_ups(data: dict, authorization: str):
@@ -25,14 +20,14 @@ async def procesar_cambio_ups(data: dict, authorization: str):
     if not estado_ups:
         raise HTTPException(status_code=400, detail="Falta el campo estado_ups")
 
-    estado_anterior = await r.get("estado_ups") or "online"
+    estado_anterior = await redis.get("estado_ups") or "online"
 
     # Control de reincidencia
     if estado_ups == estado_anterior:
         logger.info("Estado idéntico al actual. Abortando envío para evitar spam.")
         return {"status": "ignored", "estado": estado_ups}
 
-    await r.set("estado_ups", estado_ups.lower())
+    await redis.set("estado_ups", estado_ups.lower())
 
     # Obtener Chat ID de forma segura y flexible
     chat_id = getattr(Config, 'TELEGRAM_CHAT_ID', getattr(Config, 'MY_USER_ID', None))
@@ -42,14 +37,14 @@ async def procesar_cambio_ups(data: dict, authorization: str):
 
     # Evaluación de estados y notificaciones
     if estado_ups == "ONBATT":
-        await r.set("tiempo_caido", str(int(time.time())))
+        await redis.set("tiempo_caido", str(int(time.time())))
         enviar_mensaje_telegram(
             "*¡ALERTA:* Corte de luz detectado en casa!\n El SAI ha entrado en baterías.",
             chat_id
         )
 
     elif estado_ups == "ONLINE":
-        start_time_str = await r.get("tiempo_caido")
+        start_time_str = await redis.get("tiempo_caido")
         duracion_texto = ""
 
         if start_time_str and start_time_str != "0":
@@ -57,7 +52,7 @@ async def procesar_cambio_ups(data: dict, authorization: str):
             minutos = downtimes_segundos // 60
             duracion_texto = f"⏱️Tiempo sin servicio: {minutos} minutos."
 
-        await r.set("tiempo_caido", "0")
+        await redis.set("tiempo_caido", "0")
         enviar_mensaje_telegram(
             f"*¡AVISO:* La energía eléctrica ha sido restaurada.\n{duracion_texto}",
             chat_id
