@@ -8,7 +8,7 @@ from api.config.redis import redis
 from api.utils import enviar_mensaje_telegram
 
 
-def cmd_status(chat_id, _data=None):
+async def cmd_status(chat_id, _data=None):
     # Verificación activa de conectividad
     try:
         response = requests.get(f"https://{Config.TARGET_URL}", timeout=5)
@@ -17,8 +17,8 @@ def cmd_status(chat_id, _data=None):
         conexion_activa = False
 
     # Estado del SAI desde Redis
-    estado_ups = redis.get("estado_ups") or "online"
-    start_time_str = redis.get("tiempo_caido")
+    estado_ups = await redis.get("estado_ups") or "online"
+    start_time_str = await redis.get("tiempo_caido")
 
     if conexion_activa and estado_ups == "online":
         texto = "✅ El sistema está operativo, con red y sin incidencias."

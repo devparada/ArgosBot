@@ -24,6 +24,6 @@ async def telegram_webhook(request: Request):
 
         handler = COMMANDS.get(texto)
         if handler:
-            handler(chat_id, data)
+            await handler(chat_id, data)
 
     return {"status": "ok"}
