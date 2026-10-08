@@ -1,4 +1,4 @@
-from upstash_redis import Redis
+from upstash_redis.asyncio import Redis
 
 from api.config.config import Config
 
